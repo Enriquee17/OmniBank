@@ -1,0 +1,7 @@
+Tarea 1: Requerimientos No Funcionales de OmniBank
+
+Requerimientos No Funcionales:
+
+NFR1: La base de datos debe impedir que una cuenta tenga saldo negativo.
+NFR2: La base de datos debe permitir la eliminación de clientes, los clientes cerrados deben mantenerse registrados y marcarse como inactivos.
+NFR3: La base de datos debe registrar automáticamente la fecha y hora de la última actualización de cada cuenta.
