@@ -1,0 +1,20 @@
+Actividad 2: Diseñando el ERD Base de OmniBank
+
+[Clientes] 1 --------------- N [Cuentas]
+- cliente id (PK)              - cuenta id (PK)
+- nombre                       - cliente id (FK)
+- correo                       - numero de cuenta
+- numero telefono              - moneda
+- fecha de nacimiento          - tipo de cuenta
+- numero fiscal                - saldo actual
+                               - limite de credito
+
+
+                   (Cuenta Origen)
+[Cuentas] 1 ------------------------- N [Cuenta Detalle] N ----------------------- 1 [Transacciones]
+                                         - detalle id (PK)                           - transaccion id (PK)
+                                         - cuenta id (FK)                            - monto
+                                         - transacción id (FK)                       - tipo transaccion
+                                         - cuenta origen                             - fecha
+                                         - cuenta destino     
+                                        
