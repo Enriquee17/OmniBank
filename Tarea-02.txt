@@ -1,22 +1,17 @@
-Tarea 2: Refinamiento del ERD de OmniBank
+[Clientes] 1 ------------ N [Cuentas]
+- cliente_id (PK, UUID)       - cuenta_id (PK, UUID)
+- nombre                      - cliente_id (FK, UUID)
+- correo                      - moneda
+- telefono                    - tipo_cuenta
+- fecha_nacimiento            - saldo_actual (CHECK: >= 0)
+- tax_id (UNIQUE)             - limite_credito
+- is_active (Soft Delete)     - updated_at (Timestamp NFR)
 
-[Clientes] 1 ---------------- N [Cuentas]
-- cliente_id (PK)               - cuenta_id (PK)
-- nombre_completo               - cliente_id (FK)
-- correo (único)                - numero_cuenta
-- telefono                      - moneda
-- fecha_nacimiento              - tipo_cuenta
-- tax_id (único)                - saldo (no puede ser negativo)
-- sigue_activo                  - limite_credito
-                                - adaptar_cambio
-
-                  (Cuenta Origen)
-[Cuentas] 1 --------------------------- N [Transacciones]
-                                          - transaccion_id (PK)
-                  (Cuenta Destino)        - cuenta_origen_id (FK)
-          1 --------------------------- N - cuenta_destino_id (FK)
+                   (Cuenta Origen)
+[Cuentas] 1 ------------------------- N [Transacciones]
+                                          - transaccion_id (PK, UUID)
+                   (Cuenta Destino)       - from_account (FK, UUID -> Cuentas)
+[Cuentas] 1 ------------------------- N   - to_account (FK, UUID -> Cuentas)
                                           - monto
                                           - tipo_transaccion
                                           - fecha_completada
-
-Nota: Todas las PK y FK deben tener UUID
