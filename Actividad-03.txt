@@ -1,0 +1,35 @@
+Actividad 3: Normalizando el Prototipo Monolítico de OmniBank
+
+Paso 1 - Primera Forma (1NF)
+
+Clientes:
+
+cliente_id (PK)     Nombre
+    c-01         Roberto Soto
+
+Contacto:
+
+contacto_id (PK)    cliente_id (FK)    Número
+    t-01                c-01          555-9011
+
+Correo:
+
+correo_id (PK)     cliente_id (FK)      Correo
+    co-01              c-01           rob@mail.com
+
+Moneda tipo:
+
+Moneda     Tipo
+ USD     checking
+
+Paso 2
+
+Clientes:
+
+cliente_tax_id (PK)    Nombre    Numero      Correo
+    TAX-9911          Roberto   555-9011    rob@mail.com
+
+Sucursales:
+
+sucursal_codigo (PK)     sucursal dirección 
+      S-CDMX                Av.Juarez#100
