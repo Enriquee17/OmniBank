@@ -1,0 +1,22 @@
+Tarea 2: Refinamiento del ERD de OmniBank
+
+[Clientes] 1 ---------------- N [Cuentas]
+- cliente_id (PK)               - cuenta_id (PK)
+- nombre_completo               - cliente_id (FK)
+- correo (único)                - numero_cuenta
+- telefono                      - moneda
+- fecha_nacimiento              - tipo_cuenta
+- tax_id (único)                - saldo (no puede ser negativo)
+- sigue_activo                  - limite_credito
+                                - adaptar_cambio
+
+                  (Cuenta Origen)
+[Cuentas] 1 --------------------------- N [Transacciones]
+                                          - transaccion_id (PK)
+                  (Cuenta Destino)        - cuenta_origen_id (FK)
+          1 --------------------------- N - cuenta_destino_id (FK)
+                                          - monto
+                                          - tipo_transaccion
+                                          - fecha_completada
+
+Nota: Todas las PK y FK deben tener UUID
