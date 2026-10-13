@@ -1,0 +1,5 @@
+Tarea 7: Sincronización Resiliente del Pipeline KYC con Escrituras Idempotentes (`UPSERT`)
+
+El patrón Read-Before-Write debe evitarse porque realiza dos operaciones por cada registro (SELECT y luego INSERT o UPDATE), aumentando la latencia y el trafico entre la aplicación y la base de datos. Además en entornos concurrentes puede generar condiciones de carrera, donde dos procesos verifican simultáneamente que un cliente no exista e intentan insertarlo al mismo tiempo, provocando errores de duplicidad y fallos transaccionales.
+
+La solución recomendada es utilizar UPSERT mediante INSERT....ON CONFLICT DO UPDATE, delegando al motor de PostgreSQL la decisión de insertar o actualizar en una sola operación atómica.
