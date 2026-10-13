@@ -1,0 +1,5 @@
+Tarea 5: Dictamen y Defensa de Políticas de Integridad Referencial en OmniBank
+
+Se realizo el uso de ON DELETE CASCADE en las tablas principales de OmniBank. En un entorno bancario, este comportamiento representa un riesgo critico, ya que la eliminación accidental o no autorizada de un cliente podría provocar la perdida automática de cuentas, prestamos y transacciones asociadas. Esto comprometería la integridad referencial, la trazabilidad financiera y la evidencia histórica par la operación segura del banco.
+
+La política oficial de OmniBank será utilizar ON DELETE RESTRICT en todas las relaciones criticas y aplicar bajas lógicas mediante campos como is_active = false o estados como CLOSED. De esta forma. el cliente o la cuenta dejan de operar, pero el historial permanece intacto, garantizando cumplimiento normativo, auditoria completa y preservación de la información financiera.
