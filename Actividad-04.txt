@@ -1,0 +1,19 @@
+Actividad 4: Asignación de Tipos de Datos Nativos y Enums en OmniBank
+
+1. Diseña los Tipos Enumerados del banco
+
+Monedas: CREATE TYPE moneda AS ENUM ('USD', 'EUR', 'MXN');
+Cuentas: CREATE TYPE tipo_cuenta AS ENUM ('CHECKING', 'SAVINGS', 'CREDIT');
+Movimiento transaccional: CREATE TYPE tipo_transaccion AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER');
+
+2. Corrección de Tipos Nativos y Especificación Relacional
+
+           Cuentas
+    cuenta_id (PK) (UUID)
+    cliente_id (PK) (UUID)
+        saldo (NUMERIC)
+fecha_modificacion (TIMESTAMPTZ)
+          tipo_cuenta
+            moneda
+
+El tipo físico para todas las PK y FK en clientes, cuentas y transacciones es UUID
