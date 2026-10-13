@@ -1,29 +1,20 @@
---Actividad 13: CTE y pipeline de métricas por cuenta
-
---CTE 1 - Una fila por cuenta con movimientos
-
-WITH transaction_account AS (
-   SELECT account_id, COUNT(transaction_id) AS total_events, SUM(amount) AS gross_volume
-   FROM core.transactions
-   GROUP BY account_id
-),
-
---CTE 2 - Una fila por cuenta activa
-
-account_activity AS (
-    SELECT a.account_id, a.customer_id, a.account_number, a.currency,
-    COALESCE(ta.total_events,0) AS total_events,
-    COALESCE(ta.gross_volume,0) AS gross_volume
-    FROM core.accounts a
-    LEFT JOIN transaction_account ta
-        ON a.account_id = ta.account_id
-    WHERE a.is_active = TRUE)
-
---Consulta final
-
-SELECT aa.account_number, c.first_name, c.last_name, aa.currency, aa.total_events, aa.gross_volume,
-    CASE WHEN aa.total_events = 0 THEN 'SIN ACTIVIDAD' WHEN aa.total_events <= 1 THEN 'BAJA' ELSE 'ALTA' END AS banda
-FROM account_activity aa
-JOIN core.customers c
-    ON aa.customer_id = c.customer_id
-ORDER BY aa.account_number;
+WITH movement AS (
+ SELECT account_id, COUNT(*) AS tx_count, SUM(amount) AS gross_volume
+ FROM core.transactions GROUP BY account_id
+), account_metrics AS (
+ SELECT a.account_id, a.account_number, a.currency, a.customer_id,
+        COALESCE(m.tx_count,0) AS tx_count,
+        COALESCE(m.gross_volume,0) AS gross_volume
+ FROM core.accounts a LEFT JOIN movement m USING (account_id)
+ WHERE a.is_active
+)
+SELECT c.first_name, c.last_name, am.account_number, am.currency,
+       am.tx_count, am.gross_volume,
+       CASE WHEN am.tx_count = 0 THEN 'SIN MOVIMIENTOS' ELSE 'CON MOVIMIENTOS' END AS activity_band
+FROM account_metrics am JOIN core.customers c USING (customer_id)
+ORDER BY am.account_number;
+SELECT (SELECT COUNT(*) FROM core.accounts WHERE is_active) AS active_accounts,
+       (SELECT COALESCE(SUM(amount),0) FROM core.transactions) AS direct_gross_volume;
+-- Lectura de la solución: El tablero de productos necesita una medida de actividad por cuenta que otras consultas puedan reutilizar. 
+-- El equipo no quiere repetir una agregación cada vez que agrega datos del titular o de la moneda. 
+-- Un pipeline de CTE permite nombrar las etapas y declarar si cada una tiene una fila por movimiento, por cuenta o por moneda.
