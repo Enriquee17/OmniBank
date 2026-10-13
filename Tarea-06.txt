@@ -1,0 +1,21 @@
+Tarea 6: Análisis Forense Post-Mortem de Bloqueo Masivo en Producción (OmniBank)
+
+1. Causa Raiz del incidente
+
+El comando ALTER TABLE...ADD CONTRAINT CHECK ejecutado directamente sobre core.transactions obligó a PostgreSQL a validar los 75 millones de filas existentes. Para realizar esta operación, el motor adquirió un bloqueo AccesExclusiveLock, impidiendo simultáneamente lecturas, inserciones y modificicaciones sobre la tabla. Como consecuencia, las aplicaciones, cajeros y servicios dependientes quedaron bloqueados hasta que la operación fue cancelada.
+
+2. Solución
+
+Para evitar interrupciones de servicio, la restricción debe agregarse inicialmente sin validar los registros históricos:
+
+ALTER TABLE core.transactions
+ADD CONSTRAINT chk_transactions_description_valid
+CHECK (LENGHT(TRIM(description)) >= 5)
+NOT VALID;
+
+De esta forma, la regla se aplica inmediatamente a los nuevos registros sin escanear ni bloquear los millones de filas existentes.
+
+3. Validación Segura Posterior
+
+ALTER TABLE core.transactions
+VALIDATE CONSTRAINT chk_transactions_description_valid;
