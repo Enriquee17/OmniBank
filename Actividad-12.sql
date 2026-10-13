@@ -1,28 +1,23 @@
---Actividad 12: Subconsultas correlacionadas y cuentas sin movimientos
+SELECT t_ext.transaction_id,t_ext.account_id,t_ext.amount,
+       (SELECT ROUND(AVG(t_int.amount),2)
+        FROM core.transactions t_int
+        WHERE t_int.account_id=t_ext.account_id) AS account_average
+FROM core.transactions t_ext
+WHERE t_ext.amount>(
+  SELECT AVG(t_int.amount)
+  FROM core.transactions t_int
+  WHERE t_int.account_id=t_ext.account_id
+)
+ORDER BY t_ext.amount DESC;
+SELECT account_id,ROUND(AVG(amount),2) AS account_average
+FROM core.transactions GROUP BY account_id ORDER BY account_id;
 
---Comprobar promedios
-
-SELECT account_id, AVG(amount) AS promedio
-FROM core.transactions
-GROUP BY account_id
-ORDER BY account_id;
-
---Subconsulta
-
-SELECT transaction_id, account_id, amount,
-    (SELECT AVG(tx.amount)FROM core.transactions tx
-     WHERE t.account_id = t.account_id) AS account_avg
-FROM core.transactions t
-WHERE amount > (SELECT AVG(x.amount) FROM core.transactions x
-     WHERE x.account_id = t.account_id)
-ORDER BY account_id;
-
---Uso de NOT EXISTS
-
-SELECT account_number, is_active
+SELECT a.account_number,a.is_active,a.balance
 FROM core.accounts a
-WHERE NOT EXISTS (SELECT 1 FROM core.transactions t WHERE t.account_id = a.account_id)
-ORDER BY account_number;
-
---En la subconsulta del promedio solo aparece un movimiento porque es el que supera la condición de que el monto debe ser mayor a su promedio y 
---en la otra consulta solo aparecen las cuentas sin movimientos, una activa y la otra desactivada. ACCT-1002 = FALSE y ACCT-3002 = TRUE.
+WHERE NOT EXISTS (
+  SELECT 1 FROM core.transactions t WHERE t.account_id=a.account_id
+)
+ORDER BY a.account_number;
+--Lectura de la solución: El equipo de revisión busca movimientos superiores al comportamiento habitual de su propia cuenta 
+-- y cuentas que nunca han registrado eventos. Comparar un movimiento de John con el promedio global de todas las cuentas 
+-- respondería otra pregunta. La ausencia de eventos también debe distinguirse del estado is_active para no emitir una alerta administrativa falsa.
