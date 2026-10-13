@@ -1,23 +1,25 @@
---Tarea 12: Exclusión segura con NOT EXISTS y NULL
-
---Consulta extendida cuentas activas sin ningún movimiento
-
-SELECT account_number, is_active
+SELECT a.account_number,a.account_type,a.balance
 FROM core.accounts a
-WHERE a.is_active = TRUE
-AND NOT EXISTS (SELECT 1 FROM core.transactions t WHERE t.account_id = a.account_id)
-ORDER BY account_number;
+WHERE a.is_active
+  AND NOT EXISTS (
+    SELECT 1 FROM core.transactions t WHERE t.account_id=a.account_id
+  )
+ORDER BY a.account_number;
 
---Consulta ausencia de DEPOSIT
-
-SELECT account_number, is_active
+SELECT a.account_number,a.is_active
 FROM core.accounts a
-WHERE NOT EXISTS( SELECT 1 FROM core.transactions t WHERE t.account_id = a.account_id AND t.tx_type = 'DEPOSIT')
-ORDER BY account_number;
+WHERE NOT EXISTS (
+  SELECT 1 FROM core.transactions t
+  WHERE t.account_id=a.account_id AND t.tx_type='DEPOSIT'
+)
+ORDER BY a.account_number;
 
---Demostración NOT IN con NULL
+WITH valores(x) AS (VALUES (1),(NULL::integer))
+SELECT 2 NOT IN (SELECT x FROM valores) AS not_in_with_null,
+       NOT EXISTS (SELECT 1 FROM valores WHERE x=2) AS not_exists_result;
+-- El comparador de NOT IN encuentra un NULL y no puede demostrar que 2 sea distinto de todos los valores: 
+-- el resultado es UNKNOWN. NOT EXISTS solo pregunta si existe una fila que satisfaga x=2 y devuelve TRUE cuando no la hay.
 
-SELECT 5 NOT IN (1, 2, NULL) AS resultado_not_in;
-
---Cuando un listado contiene valores NULL, usando NOT IN produce un resultado UNKNOWN, ya que SQL no puede determinar si el valor buscado 
---coincide con el elemento nulo. Por esta razón, en consultas de ausencia es mas seguro utilizar NOT EXISTS ya que evita problemas causados por valores NULL.
+-- Lectura de la solución: La misma revisión necesita separar cuentas activas sin eventos de cuentas que nunca han recibido un depósito. 
+-- El segundo conjunto no equivale al primero: una cuenta puede tener transferencias o retiros y seguir sin DEPOSIT. 
+-- La tarea consolida el uso de NOT EXISTS antes de introducir CTE en el día siguiente.
