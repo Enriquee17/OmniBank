@@ -1,41 +1,31 @@
---Actividad 10: tablero de saldos y actividad registrada de OmniBank
-
---1.Tablero de productos: una fila por tipo cuenta activo
-
+-- Grano: account_type. balance procede solo de accounts.
 SELECT account_type,
-    COUNT(*) AS total_accounts,
-    SUM(balance) AS total_balance,
-    MIN(balance) AS min_balance,
-    MAX(balance) AS max_balance,
-    AVG(balance) AS avg_balance
+       COUNT(*) AS account_count,
+       SUM(balance) AS stored_balance_total,
+       MIN(balance) AS smallest_stored_balance,
+       MAX(balance) AS largest_stored_balance,
+       ROUND(AVG(balance),2) AS average_stored_balance
 FROM core.accounts
-WHERE is_active = TRUE
+WHERE is_active
 GROUP BY account_type
-ORDER BY total_balance DESC, account_type;
+ORDER BY stored_balance_total DESC,account_type;
 
---2.Segmentación de titulares: una fila por cliente elegible
-
-SELECT c.customer_id, c.email,
-    COUNT(t.transaction_id)
-    SUM(t.amount)
+-- Grano: cliente. transaction_id cuenta eventos reales, no filas externas.
+SELECT c.customer_id,c.first_name,c.last_name,c.email,
+       COUNT(t.transaction_id) AS recorded_event_count,
+       COALESCE(SUM(t.amount),0) AS recorded_gross_volume
 FROM core.customers c
-LEFT JOIN core.accounts a
-    ON c.customer_id = a.customer_id
-LEFT JOIN core.transactions t
-    ON a.account_id = t.account_id
-GROUP BY c.customer_id,
-HAVING COUNT(t.transaction_id) >= 2 OR SUM(t.amount) > 100
-ORDER BY c.email;
+LEFT JOIN core.accounts a ON a.customer_id=c.customer_id
+LEFT JOIN core.transactions t ON t.account_id=a.account_id
+GROUP BY c.customer_id,c.first_name,c.last_name,c.email
+HAVING COUNT(t.transaction_id)>=2 OR COALESCE(SUM(t.amount),0)>100
+ORDER BY recorded_gross_volume DESC,c.email;
 
---WHERE filtra filas antes de agrupar, mientras que  HAVING filtra "grupos" después de agrupar
-
---3.Control independiente
-
-SELECT account_id,
-    COUNT(transaction_id)
-    SUM(amount)
-FROM core.transactions
-GROUP BY account_id
-ORDER BY account_id;
-
---El saldo de CREDIT puede ser cero mientras su volumen registrado es 300 porque saldo viene de accounts.balance y volumen viene de transactions.amount, no son lo mismo.
+-- Controles independientes: cada medida se obtiene en su tabla de origen.
+SELECT COUNT(*) AS active_accounts,SUM(balance) AS stored_balance_total
+FROM core.accounts WHERE is_active;
+SELECT COUNT(*) AS recorded_events,SUM(amount) AS recorded_gross_volume
+FROM core.transactions;
+-- La cuenta CREDIT de Alice tiene saldo almacenado cero y un depósito histórico de 300. La coexistencia no obliga a 
+-- corregir ningún dato: la semilla solo registra parte de la historia. La condición de HAVING se evalúa después de agrupar; 
+-- moverla a WHERE no compila como condición agregada.
